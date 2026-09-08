@@ -1,11 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { ListFilter, Search, ArrowUpDown, ArrowUp, ArrowDown, Activity } from 'lucide-react';
+import { ListFilter, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Card } from './ui/Card';
 import { ProcessStateBadge } from './StatusBadge';
 
-/**
- * Normalizes a process item defensively from diverse backend shapes
- */
 function normalizeProcess(item, index) {
   if (!item || typeof item !== 'object') {
     return {
@@ -21,24 +18,15 @@ function normalizeProcess(item, index) {
     };
   }
 
-  // PID / PPID
   const pid = item.pid ?? item.PID ?? '—';
   const ppid = item.ppid ?? item.PPID ?? '—';
-
-  // Thread identifiers
   const lwp = item.lwp ?? item.LWP ?? item.tid ?? item.TID ?? '—';
   const nlwp = item.nlwp ?? item.NLWP ?? item.threads ?? item.threads_count ?? '—';
-
-  // Process State
   const state = item.state ?? item.stat ?? item.s ?? item.State ?? item.S ?? '—';
-
-  // CPU / MEM
   const rawCpu = item.cpu ?? item['%cpu'] ?? item.pcpu ?? item.CPU ?? 0;
   const rawMem = item.mem ?? item['%mem'] ?? item.pmem ?? item.MEM ?? 0;
   const cpu = parseFloat(rawCpu) || 0;
   const mem = parseFloat(rawMem) || 0;
-
-  // Command string
   const command = item.cmd ?? item.command ?? item.args ?? item.CMD ?? item.COMMAND ?? '—';
 
   return {
@@ -63,9 +51,8 @@ export function ProcessTable({
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState('cpu');
-  const [sortDirection, setSortDirection] = useState('desc'); // default sort by highest CPU%
+  const [sortDirection, setSortDirection] = useState('desc');
 
-  // Defensive list extraction
   const rawList = useMemo(() => {
     const parsed = data?.parsed;
     if (Array.isArray(parsed)) return parsed;
@@ -79,7 +66,6 @@ export function ProcessTable({
     return rawList.map(normalizeProcess);
   }, [rawList]);
 
-  // Client-side filtering by PID or Command
   const filteredList = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return normalizedList;
@@ -98,7 +84,6 @@ export function ProcessTable({
     });
   }, [normalizedList, searchQuery]);
 
-  // Sorting
   const sortedList = useMemo(() => {
     const list = [...filteredList];
     list.sort((a, b) => {
@@ -128,16 +113,15 @@ export function ProcessTable({
   };
 
   const columns = [
-    { key: 'pid', label: 'PID', align: 'left', sortable: true, width: 'w-16' },
-    { key: 'ppid', label: 'PPID', align: 'left', sortable: true, width: 'w-16' },
-    { key: 'lwp', label: 'LWP (TID)', align: 'left', sortable: true, width: 'w-20' },
-    { key: 'nlwp', label: 'NLWP', align: 'center', sortable: true, width: 'w-16' },
+    { key: 'pid', label: 'PID', align: 'left', sortable: true },
+    { key: 'ppid', label: 'PPID', align: 'left', sortable: true },
+    { key: 'lwp', label: 'LWP (TID)', align: 'left', sortable: true },
+    { key: 'nlwp', label: 'NLWP', align: 'center', sortable: true },
     {
       key: 'state',
       label: 'State',
       align: 'center',
       sortable: true,
-      width: 'w-24',
       render: (val) => <ProcessStateBadge state={val} />,
     },
     {
@@ -145,9 +129,8 @@ export function ProcessTable({
       label: '%CPU',
       align: 'right',
       sortable: true,
-      width: 'w-20',
       render: (val) => (
-        <span className={val > 5 ? 'text-amber-400 font-bold' : ''}>
+        <span className={val > 5 ? 'text-amber font-bold' : 'text-ink'}>
           {val.toFixed(1)}%
         </span>
       ),
@@ -157,7 +140,6 @@ export function ProcessTable({
       label: '%MEM',
       align: 'right',
       sortable: true,
-      width: 'w-20',
       render: (val) => `${val.toFixed(1)}%`,
     },
     {
@@ -165,7 +147,7 @@ export function ProcessTable({
       label: 'Command',
       align: 'left',
       sortable: true,
-      cellClassName: 'font-mono text-slate-200 light:text-slate-900 max-w-xs truncate',
+      cellClassName: 'font-mono text-ink max-w-xs truncate',
       render: (val) => (
         <span title={val} className="truncate block font-mono">
           {val}
@@ -186,23 +168,23 @@ export function ProcessTable({
       onViewRaw={onViewRaw}
       className="col-span-full"
     >
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {/* Filter and stats controls */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-500" />
+            <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-navy/50" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by PID, TID, or command name..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-md bg-slate-950/60 light:bg-slate-50 border border-slate-800 light:border-slate-300 text-xs font-mono text-slate-200 light:text-slate-800 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+              className="w-full pl-8 pr-3 py-1.5 rounded-md bg-paper border border-mist text-xs font-mono text-ink placeholder:text-navy/40 focus:outline-none focus:border-amber transition-colors shadow-sm"
             />
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+          <div className="flex items-center gap-3 text-xs font-mono text-navy">
             <span>
-              Showing <strong className="text-sky-400">{sortedList.length}</strong> of{' '}
+              Showing <strong className="text-amber font-bold">{sortedList.length}</strong> of{' '}
               {normalizedList.length} threads
             </span>
           </div>
@@ -210,9 +192,9 @@ export function ProcessTable({
 
         {/* Desktop & Tablet View: Sortable Interactive Table */}
         <div className="hidden sm:block">
-          <div className="w-full overflow-x-auto overflow-y-auto max-h-[420px] rounded border border-slate-800 light:border-slate-200">
+          <div className="w-full overflow-x-auto overflow-y-auto max-h-[420px] rounded border border-mist bg-paper">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="sticky top-0 bg-slate-900 light:bg-slate-100 z-10 border-b border-slate-800 light:border-slate-200 shadow-sm">
+              <thead className="sticky top-0 bg-mist/60 backdrop-blur-sm z-10 border-b border-mist shadow-sm">
                 <tr>
                   {columns.map((col) => {
                     const isSorted = sortColumn === col.key;
@@ -220,7 +202,7 @@ export function ProcessTable({
                       <th
                         key={col.key}
                         onClick={() => handleSort(col.key)}
-                        className={`px-3 py-2 font-medium text-slate-400 light:text-slate-600 select-none cursor-pointer hover:text-slate-200 light:hover:text-slate-900 whitespace-nowrap ${
+                        className={`px-3 py-2 font-semibold text-navy select-none cursor-pointer hover:text-ink whitespace-nowrap ${
                           col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                         }`}
                       >
@@ -236,9 +218,9 @@ export function ProcessTable({
                           <span>{col.label}</span>
                           {isSorted ? (
                             sortDirection === 'asc' ? (
-                              <ArrowUp className="w-3 h-3 text-sky-400" />
+                              <ArrowUp className="w-3.5 h-3.5 text-amber" />
                             ) : (
-                              <ArrowDown className="w-3 h-3 text-sky-400" />
+                              <ArrowDown className="w-3.5 h-3.5 text-amber" />
                             )
                           ) : (
                             <ArrowUpDown className="w-3 h-3 opacity-30 hover:opacity-100" />
@@ -249,12 +231,12 @@ export function ProcessTable({
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 light:divide-slate-200/80 bg-slate-950/40 light:bg-white font-mono">
+              <tbody className="divide-y divide-mist/60 bg-paper font-mono">
                 {sortedList.length === 0 ? (
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="px-4 py-8 text-center text-slate-500 italic"
+                      className="px-4 py-8 text-center text-navy/60 italic font-sans"
                     >
                       {rawList.length === 0
                         ? 'No process data received from ps -eLf.'
@@ -265,12 +247,12 @@ export function ProcessTable({
                   sortedList.map((row) => (
                     <tr
                       key={row.id}
-                      className="hover:bg-slate-800/40 light:hover:bg-slate-50 transition-colors"
+                      className="hover:bg-mist/30 transition-colors"
                     >
                       {columns.map((col) => (
                         <td
                           key={col.key}
-                          className={`px-3 py-1.5 text-slate-300 light:text-slate-700 whitespace-nowrap text-[11px] ${
+                          className={`px-3 py-1.5 text-ink whitespace-nowrap text-[11px] ${
                             col.align === 'right'
                               ? 'text-right'
                               : col.align === 'center'
@@ -292,32 +274,32 @@ export function ProcessTable({
         {/* Mobile View: Process Card Deck */}
         <div className="sm:hidden space-y-2 max-h-[420px] overflow-y-auto">
           {sortedList.length === 0 ? (
-            <div className="py-6 text-center text-slate-500 text-xs italic">
+            <div className="py-6 text-center text-navy/60 text-xs italic font-sans">
               {rawList.length === 0 ? 'No process data received.' : 'No matching processes.'}
             </div>
           ) : (
             sortedList.map((proc) => (
               <div
                 key={proc.id}
-                className="p-2.5 rounded border border-slate-800 light:border-slate-200 bg-slate-950/60 light:bg-slate-50 text-xs font-mono space-y-1.5"
+                className="p-2.5 rounded border border-mist bg-mist/20 text-xs font-mono space-y-1.5"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sky-400">PID {proc.pid}</span>
-                    <span className="text-slate-500 text-[10px]">PPID {proc.ppid}</span>
-                    <span className="text-slate-500 text-[10px]">LWP {proc.lwp}</span>
+                    <span className="font-bold text-navy">PID {proc.pid}</span>
+                    <span className="text-navy/60 text-[10px]">PPID {proc.ppid}</span>
+                    <span className="text-navy/60 text-[10px]">LWP {proc.lwp}</span>
                   </div>
                   <ProcessStateBadge state={proc.state} />
                 </div>
 
-                <div className="truncate text-slate-200 light:text-slate-800 text-[11px]" title={proc.command}>
+                <div className="truncate text-ink text-[11px]" title={proc.command}>
                   {proc.command}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80 light:border-slate-200">
-                  <span>CPU: <strong className="text-slate-200">{proc.cpu.toFixed(1)}%</strong></span>
-                  <span>MEM: <strong className="text-slate-200">{proc.mem.toFixed(1)}%</strong></span>
-                  <span>NLWP: <strong className="text-slate-200">{proc.nlwp}</strong></span>
+                <div className="flex items-center justify-between text-[10px] text-navy/80 pt-1 border-t border-mist">
+                  <span>CPU: <strong className={proc.cpu > 5 ? 'text-amber font-bold' : 'text-ink'}>{proc.cpu.toFixed(1)}%</strong></span>
+                  <span>MEM: <strong className="text-ink">{proc.mem.toFixed(1)}%</strong></span>
+                  <span>NLWP: <strong className="text-ink">{proc.nlwp}</strong></span>
                 </div>
               </div>
             ))

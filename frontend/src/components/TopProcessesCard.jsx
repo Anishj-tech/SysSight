@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { Flame, Clock, Cpu } from 'lucide-react';
 import { Card } from './ui/Card';
 
+/**
+ * Normalizes top process entries
+ */
 function normalizeTopItem(item, index) {
   if (!item || typeof item !== 'object') {
     return {
@@ -41,6 +44,7 @@ export function TopProcessesCard({
 }) {
   const parsed = data?.parsed;
 
+  // Extract load averages and task count if present
   const loadAvg = useMemo(() => {
     if (!parsed) return null;
     const loads = parsed.load_avg || parsed.load_average || parsed.load;
@@ -60,6 +64,7 @@ export function TopProcessesCard({
     return null;
   }, [parsed]);
 
+  // Extract top process array
   const topProcesses = useMemo(() => {
     let list = [];
     if (Array.isArray(parsed)) {
@@ -73,10 +78,12 @@ export function TopProcessesCard({
     }
 
     const normalized = list.map(normalizeTopItem);
+    // Sort descending by CPU% and take top 8
     normalized.sort((a, b) => b.cpu - a.cpu);
     return normalized.slice(0, 8);
   }, [parsed]);
 
+  // Find max CPU for proportional bar calculation
   const maxCpu = useMemo(() => {
     if (topProcesses.length === 0) return 100;
     const highest = Math.max(...topProcesses.map((p) => p.cpu));
@@ -97,17 +104,17 @@ export function TopProcessesCard({
       <div className="space-y-3">
         {/* Load average and tasks header bar */}
         {(loadAvg || tasksSummary) && (
-          <div className="flex items-center justify-between text-xs font-mono px-3 py-1.5 rounded bg-mist/30 border border-mist text-navy">
+          <div className="flex items-center justify-between text-xs font-mono px-2.5 py-1.5 rounded bg-slate-950/60 light:bg-slate-50 border border-slate-800/80 light:border-slate-200 text-slate-400">
             {loadAvg && (
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-navy" />
-                <span>Load: <strong className="text-ink font-bold">{loadAvg}</strong></span>
+                <Clock className="w-3 h-3 text-sky-400" />
+                <span>Load: <strong className="text-slate-200 light:text-slate-800">{loadAvg}</strong></span>
               </div>
             )}
             {tasksSummary && (
               <div className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-navy" />
-                <span>Tasks: <strong className="text-ink font-bold">{tasksSummary}</strong></span>
+                <Cpu className="w-3 h-3 text-emerald-400" />
+                <span>Tasks: <strong className="text-slate-200 light:text-slate-800">{tasksSummary}</strong></span>
               </div>
             )}
           </div>
@@ -116,7 +123,7 @@ export function TopProcessesCard({
         {/* Ranked list of top processes */}
         <div className="space-y-2">
           {topProcesses.length === 0 ? (
-            <div className="py-8 text-center text-xs font-mono text-navy/60 italic font-sans">
+            <div className="py-8 text-center text-xs font-mono text-slate-500 italic">
               No top process data available from top -b -n 1.
             </div>
           ) : (
@@ -126,28 +133,32 @@ export function TopProcessesCard({
               return (
                 <div
                   key={`${proc.pid}-${proc.rank}`}
-                  className="p-2.5 rounded-md bg-paper border border-mist text-xs font-mono hover:bg-mist/15 transition-colors shadow-sm"
+                  className="p-2 rounded bg-slate-950/40 light:bg-slate-50/80 border border-slate-800/60 light:border-slate-200 text-xs font-mono hover:border-slate-700 transition-colors"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 text-[11px] text-navy/60 font-bold shrink-0">
+                      <span className="w-5 text-[10px] text-slate-500 font-bold shrink-0">
                         #{proc.rank}
                       </span>
-                      <span className="font-semibold text-ink truncate" title={proc.command}>
+                      <span className="font-semibold text-slate-200 light:text-slate-800 truncate" title={proc.command}>
                         {proc.command}
                       </span>
-                      <span className="text-[10px] text-navy/60 shrink-0">
+                      <span className="text-[10px] text-slate-500 shrink-0">
                         (PID {proc.pid})
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-navy/60 hidden sm:inline font-sans">
+                      <span className="text-[10px] text-slate-400 hidden sm:inline">
                         {proc.user}
                       </span>
                       <span
-                        className={`font-bold text-xs ${
-                          proc.cpu > 10 ? 'text-amber' : 'text-navy'
+                        className={`font-semibold text-xs ${
+                          proc.cpu > 20
+                            ? 'text-rose-400'
+                            : proc.cpu > 5
+                            ? 'text-amber-400'
+                            : 'text-sky-400'
                         }`}
                       >
                         {proc.cpu.toFixed(1)}%
@@ -155,10 +166,16 @@ export function TopProcessesCard({
                     </div>
                   </div>
 
-                  {/* Relative CPU bar */}
-                  <div className="w-full bg-mist h-1.5 rounded-full overflow-hidden">
+                  {/* Minimal flat relative CPU bar */}
+                  <div className="w-full bg-slate-800/80 light:bg-slate-200 h-1.5 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-300 bg-amber"
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        proc.cpu > 20
+                          ? 'bg-rose-500'
+                          : proc.cpu > 5
+                          ? 'bg-amber-500'
+                          : 'bg-sky-500'
+                      }`}
                       style={{ width: `${barWidth}%` }}
                     />
                   </div>

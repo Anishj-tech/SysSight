@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { RefreshControl } from '../components/RefreshControl';
 import { CpuCard } from '../components/CpuCard';
 import { MemoryCard } from '../components/MemoryCard';
@@ -18,22 +18,20 @@ import {
   fetchLocality,
 } from '../services/api';
 
-const SECTION_IDS = [
-  'overview',
-  'cpu',
-  'memory',
-  'processes',
-  'top',
-  'syscalls',
-  'locality',
-  'console',
-];
-
-export function Dashboard({ activeSection, onSectionVisible }) {
+export function Dashboard({ activeSection, onSelectSection }) {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [intervalSeconds, setIntervalSeconds] = useState(10);
   const [activeConsoleTab, setActiveConsoleTab] = useState('lscpu');
   const [isRefreshingAll, setIsRefreshingAll] = useState(false);
+
+  // Section anchor refs for smooth jumping
+  const consoleRef = useRef(null);
+  const cpuRef = useRef(null);
+  const memoryRef = useRef(null);
+  const processesRef = useRef(null);
+  const topRef = useRef(null);
+  const syscallsRef = useRef(null);
+  const localityRef = useRef(null);
 
   // Polling command hooks
   const cpuCmd = useCommand(fetchCpuInfo);
@@ -64,7 +62,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
   // Hook auto refresh with clean interval
   useAutoRefresh(handleRefreshAll, intervalSeconds * 1000, autoRefresh);
 
-  // Connection status & latest timestamp
+  // Determine global connection status and latest update timestamp
   const anySuccess =
     cpuCmd.status === 'success' ||
     memoryCmd.status === 'success' ||
@@ -90,9 +88,8 @@ export function Dashboard({ activeSection, onSectionVisible }) {
   // Jump to command console with specific tab activated
   const handleJumpToConsole = (tabId) => {
     setActiveConsoleTab(tabId);
-    const consoleEl = document.getElementById('console');
-    if (consoleEl) {
-      consoleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (consoleRef.current) {
+      consoleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -106,59 +103,25 @@ export function Dashboard({ activeSection, onSectionVisible }) {
     locality: localityCmd.data,
   };
 
-  // IntersectionObserver to sync active section with scroll position
-  useEffect(() => {
-    if (!onSectionVisible) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find entry with greatest intersection ratio or highest above center
-        const visibleEntries = entries.filter((e) => e.isIntersecting);
-        if (visibleEntries.length > 0) {
-          // Sort by intersection ratio or boundingClientRect top
-          visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-          const topVisible = visibleEntries[0];
-          onSectionVisible(topVisible.target.id);
-        }
-      },
-      {
-        root: null,
-        rootMargin: '-10% 0px -50% 0px',
-        threshold: [0.1, 0.3, 0.6],
-      }
-    );
-
-    SECTION_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [onSectionVisible]);
-
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
-      {/* Overview Anchor & Global Refresh Control Bar */}
-      <div id="overview" className="scroll-mt-20">
-        <RefreshControl
-          autoRefresh={autoRefresh}
-          onToggleAutoRefresh={setAutoRefresh}
-          intervalSeconds={intervalSeconds}
-          onChangeInterval={setIntervalSeconds}
-          onRefreshNow={handleRefreshAll}
-          isRefreshing={isRefreshingAll || cpuCmd.loading}
-          lastUpdated={latestTimestamp}
-          isBackendConnected={isBackendConnected}
-        />
-      </div>
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Global Refresh Control Bar */}
+      <RefreshControl
+        autoRefresh={autoRefresh}
+        onToggleAutoRefresh={setAutoRefresh}
+        intervalSeconds={intervalSeconds}
+        onChangeInterval={setIntervalSeconds}
+        onRefreshNow={handleRefreshAll}
+        isRefreshing={isRefreshingAll || cpuCmd.loading}
+        lastUpdated={latestTimestamp}
+        isBackendConnected={isBackendConnected}
+      />
 
       {/* Main Responsive Cards Grid */}
       <div className="space-y-6">
         {/* Row 1: CPU and Memory (2 columns on desktop) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div id="cpu" className="scroll-mt-20">
+          <div ref={cpuRef} id="cpu">
             <CpuCard
               data={cpuCmd.data}
               loading={cpuCmd.loading}
@@ -168,7 +131,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
             />
           </div>
 
-          <div id="memory" className="scroll-mt-20">
+          <div ref={memoryRef} id="memory">
             <MemoryCard
               data={memoryCmd.data}
               loading={memoryCmd.loading}
@@ -180,7 +143,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
         </div>
 
         {/* Row 2: Threads & Processes Table (Full width) */}
-        <div id="processes" className="scroll-mt-20">
+        <div ref={processesRef} id="processes">
           <ProcessTable
             data={processesCmd.data}
             loading={processesCmd.loading}
@@ -192,7 +155,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
 
         {/* Row 3: Top CPU Consumers & Cache Locality (2 columns on desktop) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div id="top" className="scroll-mt-20">
+          <div ref={topRef} id="top">
             <TopProcessesCard
               data={topCmd.data}
               loading={topCmd.loading}
@@ -202,7 +165,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
             />
           </div>
 
-          <div id="locality" className="scroll-mt-20">
+          <div ref={localityRef} id="locality">
             <LocalityCard
               data={localityCmd.data}
               loading={localityCmd.loading}
@@ -214,7 +177,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
         </div>
 
         {/* Row 4: Syscall Profiler (Manual trigger only, full width) */}
-        <div id="syscalls" className="scroll-mt-20">
+        <div ref={syscallsRef} id="syscalls">
           <SyscallCard
             data={straceCmd.data}
             loading={straceCmd.loading}
@@ -226,7 +189,7 @@ export function Dashboard({ activeSection, onSectionVisible }) {
         </div>
 
         {/* Row 5: Live Command Terminal Console (Full width) */}
-        <div id="console" className="scroll-mt-20">
+        <div ref={consoleRef} id="console">
           <CommandConsole
             commandOutputs={commandOutputs}
             activeTab={activeConsoleTab}

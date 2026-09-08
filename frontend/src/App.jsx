@@ -1,47 +1,38 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 
 export default function App() {
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('syssight-theme');
+    if (saved) return saved === 'dark';
+    return true; // Dark mode default as specified
+  });
+
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
 
-  // Persist sidebar collapsed state
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem('syssight_sidebar_collapsed') === 'true';
-    } catch {
-      return false;
+  // Apply dark mode class to html element
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      localStorage.setItem('syssight-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+      localStorage.setItem('syssight-theme', 'light');
     }
-  });
+  }, [isDark]);
 
-  const isProgrammaticScrollRef = useRef(false);
-  const scrollTimeoutRef = useRef(null);
-
-  const toggleSidebarCollapse = () => {
-    setSidebarCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem('syssight_sidebar_collapsed', String(next));
-      } catch {
-        // LocalStorage fallback
-      }
-      return next;
-    });
+  const toggleTheme = () => {
+    setIsDark((prev) => !prev);
   };
 
-  // Called when user clicks a sidebar item
-  const handleSelectSection = useCallback((sectionId) => {
+  const handleSelectSection = (sectionId) => {
     setActiveSection(sectionId);
-
-    // Suppress IntersectionObserver overrides while smooth scrolling completes
-    isProgrammaticScrollRef.current = true;
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    scrollTimeoutRef.current = setTimeout(() => {
-      isProgrammaticScrollRef.current = false;
-    }, 850);
-
     if (sectionId === 'overview') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -51,37 +42,31 @@ export default function App() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, []);
-
-  // Called by IntersectionObserver as user scrolls manually
-  const handleSectionVisible = useCallback((sectionId) => {
-    if (isProgrammaticScrollRef.current) return;
-    setActiveSection(sectionId);
-  }, []);
+  };
 
   return (
-    <div className="min-h-screen bg-paper text-ink flex flex-col font-sans selection:bg-amber selection:text-navy">
+    <div className="min-h-screen bg-slate-950 light:bg-slate-50 text-slate-100 light:text-slate-900 transition-colors duration-200 flex flex-col font-sans">
       {/* Top Fixed Header */}
       <Header
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
 
-      {/* Main App Layout: Sidebar + Natural Scrolling Content Area */}
-      <div className="flex-1 flex min-w-0">
+      {/* Main App Layout: Sidebar + Content Area */}
+      <div className="flex-1 flex">
         <Sidebar
           activeSection={activeSection}
           onSelectSection={handleSelectSection}
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebarCollapse}
         />
 
-        {/* Main Content Viewport — No overflow-y-auto so window is scroll parent */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 min-w-0">
+        {/* Main Content Viewport */}
+        <main className="flex-1 p-4 md:p-6 lg:p-8 min-w-0 overflow-y-auto">
           <Dashboard
             activeSection={activeSection}
-            onSectionVisible={handleSectionVisible}
+            onSelectSection={handleSelectSection}
           />
         </main>
       </div>

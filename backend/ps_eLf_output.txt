@@ -1,0 +1,43 @@
+UID          PID    PPID     LWP  C NLWP STIME TTY          TIME CMD
+root           1       0       1  0    1 14:43 ?        00:00:00 /usr/lib/systemd/systemd --system --deserialize=8
+root           2       1       2  0    2 14:43 hvc0     00:00:00 /init
+root           2       1       9  0    2 14:43 hvc0     00:00:00 /init
+root           7       2       7  0    2 14:43 hvc0     00:00:00 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root           7       2       8  0    2 14:43 hvc0     00:00:00 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncate
+root          47       1      47  0    1 14:43 ?        00:00:00 /usr/lib/systemd/systemd-journald
+systemd+      79       1      79  0    1 14:43 ?        00:00:00 /usr/lib/systemd/systemd-resolved
+root          85       1      85  0    1 14:43 ?        00:00:01 /usr/lib/systemd/systemd-udevd
+root         105       1     105  0    1 14:43 ?        00:00:00 /bin/sh /usr/lib/systemd/scripts/chronyd-starter.sh -n -F 1
+root         106       1     106  0    1 14:43 ?        00:00:00 /usr/sbin/cron -f -P
+message+     107       1     107  0    1 14:43 ?        00:00:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+root         111       1     111  0    1 14:43 ?        00:00:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root         132       1     132  0    1 14:43 ?        00:00:00 /usr/lib/systemd/systemd-logind
+syslog       176       1     176  0    4 14:43 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+syslog       176       1     201  0    4 14:43 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+syslog       176       1     202  0    4 14:43 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+syslog       176       1     203  0    4 14:43 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+root         195       1     195  0    1 14:43 tty1     00:00:00 /usr/sbin/agetty --noreset --noclear --issue-file=/etc/issue:/etc/issue.d:/run/issue.d:/usr/lib/issue.d - linux
+_chrony      213     105     213  0    1 14:43 ?        00:00:00 /usr/sbin/chronyd -n -F 1 -x
+root         223       1     223  0    2 14:43 ?        00:00:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root         223       1     276  0    2 14:43 ?        00:00:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+_chrony      225     213     225  0    1 14:43 ?        00:00:00 /usr/sbin/chronyd -n -F 1 -x
+root         321       2     321  0    1 14:43 ?        00:00:00 /init
+root         322     321     322  0    1 14:43 ?        00:00:00 /init
+atharva+     323     322     323  0    1 14:43 pts/0    00:00:00 -bash
+root         324       2     324  0    1 14:43 ?        00:00:00 login -- atharva1407
+atharva+     366       1     366  0    1 14:43 ?        00:00:00 /usr/lib/systemd/systemd --user --deserialize=8
+atharva+     368     366     368  0    1 14:43 ?        00:00:00 (sd-pam)
+atharva+     391     324     391  0    1 14:43 pts/1    00:00:00 -bash
+polkitd      665       1     665  0    4 14:51 ?        00:00:00 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+polkitd      665       1     667  0    4 14:51 ?        00:00:00 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+polkitd      665       1     668  0    4 14:51 ?        00:00:00 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+polkitd      665       1     669  0    4 14:51 ?        00:00:00 /usr/lib/polkit-1/polkitd --no-debug --log-level=notice
+root        3313       1    3313  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3314  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3315  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3316  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3317  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3318  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3319  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+root        3313       1    3320  0    8 15:15 ?        00:00:00 /usr/libexec/wsl-pro-service
+atharva+    3660     323    3660  0    1 15:23 pts/0    00:00:00 ps -eLf

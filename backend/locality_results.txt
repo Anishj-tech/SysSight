@@ -1,0 +1,17 @@
+Array size: 8192 x 8192
+
+Run 1:
+Row-wise time: 0.128374 seconds
+Column-wise time: 1.301925 seconds
+
+Run 2:
+Row-wise time: 0.128926 seconds
+Column-wise time: 1.454377 seconds
+
+Run 3:
+Row-wise time: 0.132624 seconds
+Column-wise time: 1.498404 seconds
+
+Mean row-wise time: 0.129975 seconds
+Mean column-wise time: 1.418235 seconds
+Column/Row ratio: 10.91x

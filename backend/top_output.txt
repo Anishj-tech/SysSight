@@ -1,0 +1,33 @@
+top - 15:23:28 up 39 min,  1 user,  load average: 0.15, 0.13, 0.04
+Tasks:  26 total,   1 running,  25 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.8 sy,  0.0 ni, 99.2 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st 
+MiB Mem :   7762.6 total,   7124.9 free,    556.2 used,    242.2 buff/cache     
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   7206.4 avail Mem 
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+      1 root      20   0   24144  15104  11260 S   0.0   0.2   0:00.68 systemd
+      2 root      20   0    3180   2212   2072 S   0.0   0.0   0:00.03 init-sy+
+      7 root      20   0    3180   2048   1940 S   0.0   0.0   0:00.00 init
+     47 root      19  -1   50400  16936  15624 S   0.0   0.2   0:00.17 systemd+
+     79 systemd+  20   0   22540  14572  11956 S   0.0   0.2   0:00.07 systemd+
+     85 root      20   0   35244  12348   9248 S   0.0   0.2   0:01.49 systemd+
+    105 root      20   0    2888   1948   1820 S   0.0   0.0   0:00.03 chronyd+
+    106 root      20   0    4472   3092   2840 S   0.0   0.0   0:00.00 cron
+    107 message+  20   0    8796   5524   4772 S   0.0   0.1   0:00.07 dbus-da+
+    111 root      20   0   44092  29716  14576 S   0.0   0.4   0:00.22 network+
+    132 root      20   0   18440   9416   8140 S   0.0   0.1   0:00.08 systemd+
+    176 syslog    20   0  220548   5832   4572 S   0.0   0.1   0:00.06 rsyslogd
+    195 root      20   0    5492   2716   2532 S   0.0   0.0   0:00.00 agetty
+    213 _chrony   20   0   24384  11796   7064 S   0.0   0.1   0:00.10 chronyd
+    223 root      20   0  123456  32628  18012 S   0.0   0.4   0:00.18 unatten+
+    225 _chrony   20   0   12092   2432   1788 S   0.0   0.0   0:00.00 chronyd
+    321 root      20   0    3188   1120    980 S   0.0   0.0   0:00.00 Session+
+    322 root      20   0    3204   1256   1108 S   0.0   0.0   0:00.06 Relay(3+
+    323 atharva+  20   0    6268   5632   3928 S   0.0   0.1   0:00.14 bash
+    324 root      20   0    8648   5512   4668 S   0.0   0.1   0:00.00 login
+    366 atharva+  20   0   21920  13036  10832 S   0.0   0.2   0:00.13 systemd
+    368 atharva+  20   0   22908   4072   2072 S   0.0   0.1   0:00.00 (sd-pam)
+    391 atharva+  20   0    6136   5400   3852 S   0.0   0.1   0:00.01 bash
+    665 polkitd   20   0  306444   8284   7472 S   0.0   0.1   0:00.09 polkitd
+   3313 root      20   0 1792044  14620  11920 S   0.0   0.2   0:00.04 wsl-pro+
+   3654 atharva+  20   0    8168   5544   3532 R   0.0   0.1   0:00.00 top

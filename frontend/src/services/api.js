@@ -63,6 +63,80 @@ async function request(endpoint, options = {}) {
 }
 
 /**
+ * Transforms the raw output of `ps -eLf` into a JSON array of objects.
+ */
+function transformProcessData(rawOutput) {
+  const lines = rawOutput.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return [];
+  
+  const headerLine = lines[0];
+  const headers = headerLine.split(/\s+/);
+  const parsed = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const parts = lines[i].split(/\s+/);
+    if (parts.length < headers.length) continue;
+    
+    const obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      if (headers[j] === 'CMD' && j === headers.length - 1) {
+        obj[headers[j]] = parts.slice(j).join(' ');
+      } else {
+        obj[headers[j]] = parts[j];
+      }
+    }
+    // Map 'C' to 'CPU' for the frontend
+    if (obj['C']) obj['CPU'] = obj['C'];
+    parsed.push(obj);
+  }
+  return parsed;
+}
+
+/**
+ * Transforms the raw output of `top -b -n 1` into a structured object.
+ */
+function transformTopData(rawOutput) {
+  const lines = rawOutput.split('\n').filter(l => l.trim().length > 0);
+  const parsed = {
+    load_avg: '—',
+    tasks: { total: '—', running: '—' },
+    processes: []
+  };
+
+  let processSection = false;
+  let headers = [];
+
+  for (let line of lines) {
+    if (line.includes('load average:')) {
+      const match = line.match(/load average:\s+(.*)/);
+      if (match) parsed.load_avg = match[1];
+    } else if (line.startsWith('Tasks:')) {
+      const totalMatch = line.match(/(\d+)\s+total/);
+      const runningMatch = line.match(/(\d+)\s+running/);
+      if (totalMatch) parsed.tasks.total = totalMatch[1];
+      if (runningMatch) parsed.tasks.running = runningMatch[1];
+    } else if (line.trim().startsWith('PID ') || line.trim().startsWith('PID\t')) {
+      processSection = true;
+      headers = line.trim().split(/\s+/);
+    } else if (processSection) {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length >= headers.length) {
+        const obj = {};
+        for (let i = 0; i < headers.length; i++) {
+          if (headers[i] === 'COMMAND' && i === headers.length - 1) {
+            obj[headers[i]] = parts.slice(i).join(' ');
+          } else {
+            obj[headers[i]] = parts[i];
+          }
+        }
+        parsed.processes.push(obj);
+      }
+    }
+  }
+  return parsed;
+}
+
+/**
  * Fetch CPU and ISA hardware specifications (via lscpu)
  * @returns {Promise<{ command: string, timestamp: string, raw_output: string, parsed: any, exit_code: number }>}
  */
@@ -83,7 +157,11 @@ export async function fetchMemoryInfo() {
  * @returns {Promise<{ command: string, timestamp: string, raw_output: string, parsed: any, exit_code: number }>}
  */
 export async function fetchProcesses() {
-  return request('/api/commands/processes');
+  const data = await request('/api/commands/processes');
+  if (data.raw_output && !data.parsed) {
+    data.parsed = transformProcessData(data.raw_output);
+  }
+  return data;
 }
 
 /**
@@ -91,7 +169,11 @@ export async function fetchProcesses() {
  * @returns {Promise<{ command: string, timestamp: string, raw_output: string, parsed: any, exit_code: number }>}
  */
 export async function fetchTop() {
-  return request('/api/commands/top');
+  const data = await request('/api/commands/top');
+  if (data.raw_output && !data.parsed) {
+    data.parsed = transformTopData(data.raw_output);
+  }
+  return data;
 }
 
 /**

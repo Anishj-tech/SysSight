@@ -150,7 +150,6 @@ It provides practical exposure to **Operating Systems, system calls, process man
 Information Technology | PICT
 
 **Atharva Ingle**
-
 Information Technology | PICT
 
 ---

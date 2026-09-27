@@ -3,6 +3,7 @@ import { RefreshControl } from '../components/RefreshControl';
 import { CpuCard } from '../components/CpuCard';
 import { MemoryCard } from '../components/MemoryCard';
 import { ProcessTable } from '../components/ProcessTable';
+import { ProcessRuntimeCard } from '../components/ProcessRuntimeCard';
 import { TopProcessesCard } from '../components/TopProcessesCard';
 import { SyscallCard } from '../components/SyscallCard';
 import { LocalityCard } from '../components/LocalityCard';
@@ -177,6 +178,17 @@ export function Dashboard({ activeSection, onSectionVisible }) {
               onViewRaw={() => handleJumpToConsole('memory')}
             />
           </div>
+        </div>
+
+        {/* Row 1.5: Process Runtime Analysis (Full width) */}
+        <div id="runtime" className="scroll-mt-20">
+          <ProcessRuntimeCard
+            data={processesCmd.data}
+            loading={processesCmd.loading}
+            error={processesCmd.error}
+            onRetry={processesCmd.refresh}
+            onViewRaw={() => handleJumpToConsole('processes')}
+          />
         </div>
 
         {/* Row 2: Threads & Processes Table (Full width) */}

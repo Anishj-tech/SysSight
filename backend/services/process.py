@@ -27,10 +27,15 @@ def get_process_info() -> dict:
     the execution result containing command, timestamp, raw_output, error,
     and exit_code without permanent caching or synthetic data.
     """
-    cmd_result = run_command(["ps", "-e", "-L", "-o", "uid,pid,ppid,lwp,c,nlwp,start,etime,tty,time,cmd"])
-
+    cmd_result = run_command([
+    "ps", "-e", "-L", "-o",
+    "uid,pid,ppid,lwp,c,nlwp,state,start,etime,tty,time,cmd"
+])
     return {
-        "command": cmd_result.get("command", "ps -e -L -o uid,pid,ppid,lwp,c,nlwp,start,etime,tty,time,cmd"),
+        "command": cmd_result.get(
+    "command",
+    "ps -e -L -o uid,pid,ppid,lwp,c,nlwp,state,start,etime,tty,time,cmd"
+),
         "timestamp": cmd_result.get("timestamp", ""),
         "raw_output": cmd_result.get("raw_output", ""),
         "error": cmd_result.get("error", ""),

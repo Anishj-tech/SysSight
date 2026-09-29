@@ -11,6 +11,8 @@ from services.process import get_process_info
 from services.top import get_top_info
 from services.tracing import get_strace_info
 from services.locality import get_locality_info
+from services.network import get_network_info
+from services.disk import get_disk_info
 
 # Initialize FastAPI application instance
 app = FastAPI(title="SysSight Backend")
@@ -87,5 +89,25 @@ def get_locality_command() -> dict:
     benchmarking CPU spatial cache locality and returning performance ratios.
     """
     return get_locality_info()
+
+
+@app.get("/api/commands/network")
+def get_network_command() -> dict:
+    """
+    Executes live 'ss -tulnp' command via the Network service on every request,
+    returning active listening sockets, ports, protocols, and bound processes.
+    """
+    return get_network_info()
+
+
+@app.get("/api/commands/disk")
+@app.get("/api/commands/iostat")
+def get_disk_command() -> dict:
+    """
+    Executes live 'iostat -xz 1 3' command via the Disk service on every request,
+    returning real-time CPU I/O wait, device throughput, IOPS, and storage utilization.
+    """
+    return get_disk_info()
+
 
 

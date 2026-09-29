@@ -191,3 +191,20 @@ export async function runStrace() {
 export async function fetchLocality() {
   return request('/api/locality');
 }
+
+/**
+ * Fetch active listening network sockets and ports (via ss -tulnp)
+ * @returns {Promise<{ command: string, timestamp: string, raw_output: string, parsed: any[], exit_code: number }>}
+ */
+export async function fetchNetworkInfo() {
+  return request('/api/commands/network');
+}
+
+/**
+ * Fetch real-time disk throughput, IOPS, and utilization (via iostat -xz 1 3)
+ * @returns {Promise<{ command: string, timestamp: string, raw_output: string, parsed: { cpu: any, devices: any[] }, exit_code: number }>}
+ */
+export async function fetchDiskInfo() {
+  return request('/api/commands/disk');
+}
+

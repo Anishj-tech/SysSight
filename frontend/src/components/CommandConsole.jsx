@@ -7,6 +7,8 @@ const CONSOLE_TABS = [
   { id: 'memory', label: 'free -h', commandStr: '$ free -h' },
   { id: 'processes', label: 'ps -eLf', commandStr: '$ ps -eLf' },
   { id: 'top', label: 'top', commandStr: '$ top -b -n 1' },
+  { id: 'network', label: 'ss -tulnp', commandStr: '$ ss -tulnp' },
+  { id: 'disk', label: 'iostat -xz 1 3', commandStr: '$ iostat -xz 1 3' },
   { id: 'strace', label: 'strace', commandStr: '$ strace -c ls' },
   { id: 'locality', label: 'locality.c', commandStr: '$ ./locality' },
 ];

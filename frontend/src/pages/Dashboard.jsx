@@ -4,6 +4,8 @@ import { CpuCard } from '../components/CpuCard';
 import { MemoryCard } from '../components/MemoryCard';
 import { ProcessTable } from '../components/ProcessTable';
 import { ProcessRuntimeCard } from '../components/ProcessRuntimeCard';
+import { NetworkCard } from '../components/NetworkCard';
+import { DiskCard } from '../components/DiskCard';
 import { TopProcessesCard } from '../components/TopProcessesCard';
 import { SyscallCard } from '../components/SyscallCard';
 import { LocalityCard } from '../components/LocalityCard';
@@ -14,6 +16,8 @@ import {
   fetchCpuInfo,
   fetchMemoryInfo,
   fetchProcesses,
+  fetchNetworkInfo,
+  fetchDiskInfo,
   fetchTop,
   runStrace,
   fetchLocality,
@@ -24,6 +28,8 @@ const SECTION_IDS = [
   'cpu',
   'memory',
   'processes',
+  'network',
+  'disk',
   'top',
   'syscalls',
   'locality',
@@ -40,6 +46,8 @@ export function Dashboard({ activeSection, onSectionVisible }) {
   const cpuCmd = useCommand(fetchCpuInfo);
   const memoryCmd = useCommand(fetchMemoryInfo);
   const processesCmd = useCommand(fetchProcesses);
+  const networkCmd = useCommand(fetchNetworkInfo);
+  const diskCmd = useCommand(fetchDiskInfo);
   const topCmd = useCommand(fetchTop);
   const localityCmd = useCommand(fetchLocality);
 
@@ -54,13 +62,15 @@ export function Dashboard({ activeSection, onSectionVisible }) {
         cpuCmd.refresh(),
         memoryCmd.refresh(),
         processesCmd.refresh(),
+        networkCmd.refresh(),
+        diskCmd.refresh(),
         topCmd.refresh(),
         localityCmd.refresh(),
       ]);
     } finally {
       setIsRefreshingAll(false);
     }
-  }, [cpuCmd, memoryCmd, processesCmd, topCmd, localityCmd]);
+  }, [cpuCmd, memoryCmd, processesCmd, networkCmd, diskCmd, topCmd, localityCmd]);
 
   // Hook auto refresh with clean interval
   useAutoRefresh(handleRefreshAll, intervalSeconds * 1000, autoRefresh);
@@ -70,6 +80,8 @@ export function Dashboard({ activeSection, onSectionVisible }) {
     cpuCmd.status === 'success' ||
     memoryCmd.status === 'success' ||
     processesCmd.status === 'success' ||
+    networkCmd.status === 'success' ||
+    diskCmd.status === 'success' ||
     topCmd.status === 'success' ||
     localityCmd.status === 'success';
 
@@ -82,6 +94,8 @@ export function Dashboard({ activeSection, onSectionVisible }) {
   const isBackendConnected = anySuccess || (!allErrored && cpuCmd.status !== 'error');
 
   const latestTimestamp =
+    networkCmd.lastUpdated ||
+    diskCmd.lastUpdated ||
     processesCmd.lastUpdated ||
     cpuCmd.lastUpdated ||
     memoryCmd.lastUpdated ||
@@ -102,6 +116,8 @@ export function Dashboard({ activeSection, onSectionVisible }) {
     lscpu: cpuCmd.data,
     memory: memoryCmd.data,
     processes: processesCmd.data,
+    network: networkCmd.data,
+    disk: diskCmd.data,
     top: topCmd.data,
     strace: straceCmd.data,
     locality: localityCmd.data,
@@ -199,6 +215,28 @@ export function Dashboard({ activeSection, onSectionVisible }) {
             error={processesCmd.error}
             onRetry={processesCmd.refresh}
             onViewRaw={() => handleJumpToConsole('processes')}
+          />
+        </div>
+
+        {/* Row 2.5: Network & Port Activity (Full width) */}
+        <div id="network" className="scroll-mt-20">
+          <NetworkCard
+            data={networkCmd.data}
+            loading={networkCmd.loading}
+            error={networkCmd.error}
+            onRetry={networkCmd.refresh}
+            onViewRaw={() => handleJumpToConsole('network')}
+          />
+        </div>
+
+        {/* Row 2.6: Disk & I/O Performance (Full width) */}
+        <div id="disk" className="scroll-mt-20">
+          <DiskCard
+            data={diskCmd.data}
+            loading={diskCmd.loading}
+            error={diskCmd.error}
+            onRetry={diskCmd.refresh}
+            onViewRaw={() => handleJumpToConsole('disk')}
           />
         </div>
 
